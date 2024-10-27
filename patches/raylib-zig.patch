@@ -1,0 +1,31 @@
+diff --git a/build.zig b/build.zig
+index 2170cf8..7eb96cc 100644
+--- a/build.zig
++++ b/build.zig
+@@ -89,11 +89,11 @@ const dir_raylib = cwd ++ sep ++ "raylib" ++ sep ++ "src";
+
+ const raylib_build = @import("raylib");
+
+-fn linkThisLibrary(b: *std.Build, target: std.Target.Query, optimize: std.builtin.Mode) *std.Build.Step.Compile {
++fn linkThisLibrary(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode) *std.Build.Step.Compile {
+     const lib = b.addStaticLibrary(
+         .{
+             .name = "raylib.zig",
+-            .target = b.resolveTargetQuery(target),
++            .target = target,
+             .optimize = optimize,
+             .root_source_file = std.Build.LazyPath{
+                 .cwd_relative = cwd ++ sep ++ "raylib.zig",
+@@ -110,10 +110,10 @@ fn linkThisLibrary(b: *std.Build, target: std.Target.Query, optimize: std.builti
+ }
+
+ /// add this package to exe
+-pub fn addTo(b: *std.Build, exe: *std.Build.Step.Compile, target: std.Target.Query, optimize: std.builtin.Mode, raylibOptions: anytype) void {
++pub fn addTo(b: *std.Build, exe: *std.Build.Step.Compile, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, raylibOptions: anytype) void {
+     const lib_raylib = raylib_build.addRaylib(
+         b,
+-        b.resolveTargetQuery(target),
++        target,
+         optimize,
+         raylibOptions,
+     ) catch |err| std.debug.panic("addRaylib: {any}", .{err});
