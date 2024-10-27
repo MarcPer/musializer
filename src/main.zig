@@ -56,28 +56,15 @@ fn storeBuffer(rawBuffer: ?*anyopaque, frames: u32) void {
         return;
     }
 
-    std.debug.assert(frames * 2 <= globalBufferSize);
-
     const bufferData: [*]f32 = @ptrCast(@alignCast(rawBuffer.?));
-
     const spareCapacity = globalBufferSize - globalBufferIndex;
-
-    var i: usize = 0;
     if (frames * 2 <= spareCapacity) {
-        while (i < frames * 2) : (i += 2) {
-            globalBuffer[globalBufferIndex] = bufferData[i];
-            globalBufferIndex += 1;
-        }
+        std.mem.copyForwards(f32, globalBuffer[globalBufferIndex..], bufferData[0 .. frames * 2]);
+        globalBufferIndex = globalBufferIndex + frames * 2;
     } else {
-        while (i < spareCapacity) : (i += 2) {
-            globalBuffer[globalBufferIndex] = bufferData[i];
-            globalBufferIndex += 1;
-        }
-        globalBufferIndex = 0;
-        while (i < (frames * 2 - spareCapacity)) : (i += 2) {
-            globalBuffer[globalBufferIndex] = bufferData[i];
-            globalBufferIndex += 1;
-        }
+        std.mem.copyForwards(f32, globalBuffer[globalBufferIndex..], bufferData[0..spareCapacity]);
+        std.mem.copyForwards(f32, globalBuffer[0..], bufferData[spareCapacity .. frames * 2]);
+        globalBufferIndex = frames * 2 - spareCapacity;
     }
 }
 
